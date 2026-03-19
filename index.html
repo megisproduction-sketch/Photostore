@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhotoStore</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: #0f172a;
+    color: white;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: rgba(15,23,42,0.9);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.menu-btn {
+    font-size: 25px;
+    cursor: pointer;
+}
+
+nav {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background: #1e293b;
+    width: 200px;
+    display: none;
+    flex-direction: column;
+    border-radius: 10px;
+}
+
+nav a {
+    padding: 15px;
+    color: white;
+    text-decoration: none;
+    border-bottom: 1px solid #334155;
+}
+
+nav a:hover {
+    background: #334155;
+}
+
+.hero {
+    text-align: center;
+    padding: 120px 20px;
+    background: linear-gradient(135deg, #3b82f6, #9333ea);
+    border-radius: 0 0 30px 30px;
+}
+
+.hero h1 {
+    font-size: 38px;
+}
+
+.hero span {
+    background: linear-gradient(45deg, #fff, #cbd5f5);
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    background: white;
+    color: #0f172a;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.upload-box {
+    text-align: center;
+    margin: 20px;
+}
+
+.upload-box input {
+    padding: 10px;
+    background: #1e293b;
+    border-radius: 10px;
+    color: white;
+}
+
+.gallery {
+    padding: 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
+}
+
+.gallery img {
+    width: 100%;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.gallery img:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    padding-top: 60px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+}
+
+.modal img {
+    display: block;
+    margin: auto;
+    max-width: 90%;
+    border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h2>PhotoStore</h2>
+    <div class="menu-btn" onclick="toggleMenu()">☰</div>
+
+    <nav id="menu">
+        <a href="#home">Beranda</a>
+        <a href="#portfolio">Portofolio</a>
+    </nav>
+</header>
+
+<section id="home" class="hero">
+    <h1><span>Jasa Fotografi</span> dan Vidiografi</h1>
+    <p>Abadikan momen mu biar ga cuma jadi kenangan basi</p>
+
+    <a href="https://wa.me/6281929049795" class="btn" target="_blank">
+        Booking Sekarang
+    </a>
+</section>
+
+<section id="portfolio">
+    <h2 style="text-align:center;">Portofolio</h2>
+
+    <div class="upload-box">
+        <input type="file" id="fileInput" accept="image/*">
+    </div>
+
+    <div class="gallery" id="gallery"></div>
+</section>
+
+<div id="modal" class="modal" onclick="closeModal()">
+    <img id="modalImg">
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    window.toggleMenu = function() {
+        const menu = document.getElementById("menu");
+        menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+    };
+
+    const input = document.getElementById("fileInput");
+    const gallery = document.getElementById("gallery");
+
+    const saved = JSON.parse(localStorage.getItem("images")) || [];
+    saved.forEach(src => addImage(src));
+
+    input.addEventListener("change", function() {
+        const file = this.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const src = e.target.result;
+            addImage(src);
+
+            let saved = JSON.parse(localStorage.getItem("images")) || [];
+            saved.push(src);
+            localStorage.setItem("images", JSON.stringify(saved));
+        };
+        reader.readAsDataURL(file);
+    });
+
+    function addImage(src) {
+        const img = document.createElement("img");
+        img.src = src;
+
+        img.onclick = () => openModal(src);
+
+        img.oncontextmenu = function(e) {
+            e.preventDefault();
+
+            if (confirm("Hapus gambar ini?")) {
+                img.remove();
+
+                let saved = JSON.parse(localStorage.getItem("images")) || [];
+                saved = saved.filter(item => item !== src);
+                localStorage.setItem("images", JSON.stringify(saved));
+            }
+        };
+
+        gallery.appendChild(img);
+    }
+
+    window.openModal = function(src) {
+        document.getElementById("modal").style.display = "block";
+        document.getElementById("modalImg").src = src;
+    };
+
+    window.closeModal = function() {
+        document.getElementById("modal").style.display = "none";
+    };
+
+});
+</script>
+
+</body>
+</html>
